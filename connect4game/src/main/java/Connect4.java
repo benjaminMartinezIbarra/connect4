@@ -8,6 +8,7 @@ public class Connect4 {
     public static final String STARTED_STATUS = "STARTED";
     protected static final String PLAYER_1 = "Player1";
     protected static final String PLAYER_2 = "Player2";
+    public Output output;
     private char[][] columns;
     private String currentPlayer;
     private String status;
@@ -17,6 +18,9 @@ public class Connect4 {
         columns = new char[7][6];
         currentPlayer = PLAYER_1;
         status = STARTED_STATUS;
+        output = new Output();
+        output.log("Game started");
+
     }
 
     public char[][] getColumns() {
@@ -24,7 +28,9 @@ public class Connect4 {
     }
 
     private void insertDisc(final int column, final char disc) {
-        insert(column, getNextPositionAvailableInColumn(column, 5), disc);
+        final int nextPositionAvailableInColumn = getNextPositionAvailableInColumn(column, 5);
+        insert(column, nextPositionAvailableInColumn, disc);
+        output.log(String.format("(%s) was inserted by %s in position (%s,%s)", disc, currentPlayer, column, nextPositionAvailableInColumn));
     }
 
     private void insert(final int column, final int position, final char x) {
@@ -55,7 +61,9 @@ public class Connect4 {
             insertDisc(column, getDiscForCurrentPlayer());
             changePlayer();
         }else{
-            throw new RuntimeException("game is Draw, restart a new one to play again");
+            String drawMessage = "game is Draw, restart a new one to play again";
+            output.log(drawMessage);
+            throw new RuntimeException(drawMessage);
         }
 
 
@@ -89,5 +97,9 @@ public class Connect4 {
 
     private boolean isEmptyPosition(int column, int row) {
         return columns[column][row] == Character.MIN_VALUE;
+    }
+
+    public String LastGameEvent() {
+        return output.lastMessage();
     }
 }

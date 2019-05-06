@@ -1,4 +1,3 @@
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -6,6 +5,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 /**
  * @author benjaminmartinez
@@ -37,9 +37,9 @@ public class GameSpec {
         game.insertDisc(1);
         game.insertDisc(2);
         game.insertDisc(3);
-        assertThat("First Player has Green disc", game.getValueAtPosition(1, 5), Matchers.equalTo(('G')));
-        assertThat("Second player has Red disc", game.getValueAtPosition(2, 5), Matchers.equalTo(('R')));
-        assertThat("First Player has Green disc", game.getValueAtPosition(3, 5), Matchers.equalTo(('G')));
+        assertThat("First Player has Green disc", game.getValueAtPosition(1, 5), equalTo(('G')));
+        assertThat("Second player has Red disc", game.getValueAtPosition(2, 5), equalTo(('R')));
+        assertThat("First Player has Green disc", game.getValueAtPosition(3, 5), equalTo(('G')));
 
     }
 
@@ -49,9 +49,7 @@ public class GameSpec {
 
     @Test
     public void whenAllDiscsAreInsertedThenGameIsDraw() {
-        for (int i = 0; i <= 5; i++) {
-            fillRow();
-        }
+        fillBoard();
         Assert.assertTrue("When no more disc can be inserted, game is a draw",
                           game.isDraw());
 
@@ -63,21 +61,22 @@ public class GameSpec {
         expectedException.expectMessage("game is Draw, restart a new one to play again");
         game.insertDisc(0);
 
-
-
     }
 
     /**
      * Convenience method for inserting in each of the column of the game, one disc at a time.
      */
-    private void fillRow() {
-        game.insertDisc(0);
-        game.insertDisc(1);
-        game.insertDisc(2);
-        game.insertDisc(3);
-        game.insertDisc(4);
-        game.insertDisc(5);
-        game.insertDisc(6);
+    private void fillBoard() {
+
+        for (int i = 0; i <= 5; i++) {
+            game.insertDisc(0);
+            game.insertDisc(1);
+            game.insertDisc(2);
+            game.insertDisc(3);
+            game.insertDisc(4);
+            game.insertDisc(5);
+            game.insertDisc(6);
+        }
     }
 
     /**
@@ -88,18 +87,40 @@ public class GameSpec {
     /**
      * Event game started
      */
+    @Test
+    public void whenGameIsStartedThenGameOutputIsGameStarted() {
+        assertThat("game is started at creation", game.LastGameEvent(), equalTo("Game started"));
+
+    }
 
     /**
      * Event discAdded
      */
 
-    /**
-     * Event player swap
-     */
+    @Test
+    public void whenDiscIsAddedByPlayer1ThenGameOutputShowsDiscAdded() {
+        game.insertDisc(1);
+        assertThat("Disc added", game.LastGameEvent(), equalTo("(G) was inserted by Player1 in position (1,5)"));
+
+    }
+
+    @Test
+    public void whenDiscIsAddedByPlayer2ThenGameOutputShowsDiscAdded() {
+        game.insertDisc(1);
+        game.insertDisc(1);
+        assertThat("Disc added", game.LastGameEvent(), equalTo("(R) was inserted by Player2 in position (1,4)"));
+
+    }
 
     /**
      * Event Game draw
      */
+    @Test
+    public void whenGAmeIsDrawOutputShowsGameIsDraw(){
+        whenGameIsDrawOneCannotInsertMoreDiscs();
+        assertThat("Game is a draw", game.LastGameEvent(), equalTo("Game is DRAW"));
+
+    }
 
     /**
      * Event Game won
