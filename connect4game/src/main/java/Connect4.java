@@ -4,15 +4,19 @@
  */
 public class Connect4 {
 
+    public static final String DRAW_STATUS = "DRAW";
+    public static final String STARTED_STATUS = "STARTED";
     protected static final String PLAYER_1 = "Player1";
     protected static final String PLAYER_2 = "Player2";
     private char[][] columns;
     private String currentPlayer;
+    private String status;
 
     public Connect4() {
 
         columns = new char[7][6];
         currentPlayer = PLAYER_1;
+        status = STARTED_STATUS;
     }
 
     public char[][] getColumns() {
@@ -33,7 +37,7 @@ public class Connect4 {
 
     private int getNextPositionAvailableInColumn(final int column, int startPos) {
 
-        if (startPos >= 0 && columns[column][startPos] == Character.MIN_VALUE) {
+        if (startPos >= 0 && isEmptyPosition(column, startPos)) {
             return startPos;
         } else if (startPos < 0) {
             throw new RuntimeException(String.format("no available positions for column %s", column));
@@ -47,8 +51,13 @@ public class Connect4 {
     }
 
     public void insertDisc(final int column) {
-        insertDisc(column, getDiscForCurrentPlayer());
-        changePlayer();
+        if (!isDraw()){
+            insertDisc(column, getDiscForCurrentPlayer());
+            changePlayer();
+        }else{
+            throw new RuntimeException("game is Draw, restart a new one to play again");
+        }
+
 
     }
 
@@ -65,5 +74,20 @@ public class Connect4 {
         } else {
             currentPlayer = PLAYER_1;
         }
+    }
+
+    public boolean isDraw() {
+        for (int col = 0; col < columns.length; col++) {
+            for (int row = 0; row < columns[col].length; row++) {
+                if (isEmptyPosition(col, row)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isEmptyPosition(int column, int row) {
+        return columns[column][row] == Character.MIN_VALUE;
     }
 }
