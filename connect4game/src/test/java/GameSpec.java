@@ -1,4 +1,3 @@
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,13 +19,16 @@ public class GameSpec {
      */
 
     private Connect4 game;
+    private Output gameOutput;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() {
-        game = new Connect4();
+        gameOutput = new Output();
+        game = new Connect4GameFactory().build(gameOutput);
+
     }
 
     /**
@@ -49,34 +51,42 @@ public class GameSpec {
 
     @Test
     public void whenAllDiscsAreInsertedThenGameIsDraw() {
-        fillBoard();
-        Assert.assertTrue("When no more disc can be inserted, game is a draw",
-                          game.isDraw());
+
+        final char[][] board = {
+                {'G', 'G', 'G', 'R', 'G', 'R', 'G'},
+                {'R', 'G', 'R', 'G', 'G', 'R', 'G'},
+                {'R', 'G', 'R', 'G', 'R', 'R', 'R'},
+                {'G', 'R', 'R', 'G', 'R', 'G', 'R'},
+                {'R', 'G', 'G', 'R', 'G', 'G', 'G'},
+                {'G', 'R', 'G', 'R', 'G', 'R', 'R'}
+        };
+
+        fillBoardWith(game, board);
+        assertThat("When no more disc can be inserted, game is a draw", game.isDraw(), equalTo(true));
 
     }
 
     @Test
     public void whenGameIsDrawOneCannotInsertMoreDiscs() {
         whenAllDiscsAreInsertedThenGameIsDraw();
-        expectedException.expectMessage("game is Draw, restart a new one to play again");
         game.insertDisc(0);
+        assertThat("game is Draw", gameOutput.lastMessage(), equalTo("Game is Draw, restart a new one to play again"));
 
     }
 
     /**
      * Convenience method for inserting in each of the column of the game, one disc at a time.
      */
-    private void fillBoard() {
 
-        for (int i = 0; i <= 5; i++) {
-            game.insertDisc(0);
-            game.insertDisc(1);
-            game.insertDisc(2);
-            game.insertDisc(3);
-            game.insertDisc(4);
-            game.insertDisc(5);
-            game.insertDisc(6);
+    private void fillBoardWith(final Connect4 game, char[][] boardfixture) {
+        Board board = game.getBoard();
+        for (int row = 0; row < boardfixture.length; row++) {
+            for (int col = 0; col < boardfixture[0].length; col++) {
+                char disc = boardfixture[row][col];
+                board.insert(col, row, disc);
+            }
         }
+
     }
 
     /**
@@ -85,22 +95,13 @@ public class GameSpec {
      */
 
     /**
-     * Event game started
-     */
-    @Test
-    public void whenGameIsStartedThenGameOutputIsGameStarted() {
-        assertThat("game is started at creation", game.LastGameEvent(), equalTo("Game started"));
-
-    }
-
-    /**
      * Event discAdded
      */
 
     @Test
     public void whenDiscIsAddedByPlayer1ThenGameOutputShowsDiscAdded() {
         game.insertDisc(1);
-        assertThat("Disc added", game.LastGameEvent(), equalTo("(G) was inserted by Player1 in position (1,5)"));
+        assertThat("Disc added", gameOutput.lastMessage(), equalTo("(G) was inserted by Player1 in position (1,5)"));
 
     }
 
@@ -108,7 +109,7 @@ public class GameSpec {
     public void whenDiscIsAddedByPlayer2ThenGameOutputShowsDiscAdded() {
         game.insertDisc(1);
         game.insertDisc(1);
-        assertThat("Disc added", game.LastGameEvent(), equalTo("(R) was inserted by Player2 in position (1,4)"));
+        assertThat("Disc added", gameOutput.lastMessage(), equalTo("(R) was inserted by Player2 in position (1,4)"));
 
     }
 
@@ -116,14 +117,93 @@ public class GameSpec {
      * Event Game draw
      */
     @Test
-    public void whenGAmeIsDrawOutputShowsGameIsDraw(){
+    public void whenGAmeIsDrawOutputShowsGameIsDraw() {
         whenGameIsDrawOneCannotInsertMoreDiscs();
-        assertThat("Game is a draw", game.LastGameEvent(), equalTo("Game is DRAW"));
+        assertThat("Game is a draw", gameOutput.lastMessage(), equalTo("Game is Draw, restart a new one to play again"));
 
     }
 
     /**
-     * Event Game won
+     * Game won
      */
+
+    @Test
+    public void testBoardOK() {
+        final char[][] board = {
+                {'G', 'G', 'G', 'G'}
+        };
+        fillBoardWith(game, board);
+        assertThat("board is a win", game.isWin(), equalTo(true));
+    }
+
+    @Test
+    public void testBoardOK_1() {
+        final char[][] board = {
+                {'G', 'G', 'G', 'R'},
+                {'G', 'G', 'G', 'G'}
+        };
+
+        fillBoardWith(game, board);
+        assertThat("board is a win", game.isWin(), equalTo(true));
+    }
+
+    @Test
+    public void testBoardOK_2() {
+        final char[][] board = {
+                {'G', 'G', 'G', 'R'},
+                {'G', 'G', 'R', 'G'},
+                {'G', 'R', 'R', 'G'},
+                {'G', 'G', 'R', 'G'},
+                };
+        fillBoardWith(game, board);
+        assertThat("board is a win", game.isWin(), equalTo(true));
+    }
+
+    @Test
+    public void testBoardOK_3() {
+        final char[][] board = {
+                {'G', 'G', 'G', 'R'},
+                {'G', 'G', 'R', 'G'},
+                {'G', 'R', 'G', 'G'},
+                {'R', 'G', 'R', 'G'},
+                };
+        fillBoardWith(game, board);
+        final boolean rcur = game.isWin();
+        assertThat("board is a win", game.isWin(), equalTo(true));
+    }
+
+    @Test
+    public void testBoardOK_4() {
+        final char[][] board = {
+                {'G', 'R', 'G', 'R'},
+                {'R', 'R', 'R', 'G'},
+                {'G', 'R', 'G', 'R'},
+                {'R', 'G', 'R', 'R'},
+                };
+        fillBoardWith(game, board);
+        assertThat("board is a win", game.isWin(), equalTo(true));
+    }
+
+    @Test
+    public void testBoardOK_5() {
+        final char[][] board = {
+                {'G', 'G', 'G', 'R', 'G'},
+                {'G', 'R', 'R', 'G', 'R'},
+                {'R', 'R', 'R', 'G', 'R'},
+                {'G', 'R', 'G', 'R', 'G'},
+                {'R', 'G', 'R', 'R', 'R'},
+                };
+        fillBoardWith(game, board);
+        assertThat("board is a win", game.isWin(), equalTo(true));
+    }
+
+    @Test
+    public void testBoardKO() {
+        final char[][] board = {
+                {'G', 'G', 'G', 'R'}
+        };
+        fillBoardWith(game, board);
+        assertThat("board is not a win", game.isWin(), equalTo(false));
+    }
 
 }

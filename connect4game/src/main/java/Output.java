@@ -1,4 +1,5 @@
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author benjaminmartinez
@@ -6,10 +7,10 @@ import java.util.Vector;
  */
 public class Output {
 
-    private Vector<String> messages;
+    private List<String> messages;
 
     public Output() {
-        this.messages = new Vector<>();
+        this.messages = new ArrayList<>();
     }
 
     public void log(final String logMessage) {
@@ -17,6 +18,7 @@ public class Output {
     }
 
     public String lastMessage() {
-        return messages.lastElement();
+        return messages.get(messages.size()-1);
     }
+
 }

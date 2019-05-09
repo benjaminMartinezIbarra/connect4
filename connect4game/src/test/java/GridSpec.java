@@ -1,10 +1,10 @@
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.equalTo;
 
 /**
@@ -31,8 +31,9 @@ public class GridSpec {
      */
     @Test
     public void whenGameIsStartedThenBoardIsSetWith7ColumnsAnd6Rows() {
-        assertThat("7 columns in connect 4 game", game.getColumns(), arrayWithSize(7));
-        assertThat("6 rows in connect 4 game", game.getColumns()[0].length == 6);
+        assertThat("7 columns in connect 4 game", game.getBoard().numberOfColumns(),
+                   equalTo(7));
+        assertThat("6 rows in connect 4 game", game.getBoard().numberOfRows() == 6);
     }
 
     /**
@@ -40,11 +41,7 @@ public class GridSpec {
      */
     @Test
     public void whenGameIsStartedThenBoardIsSetWithEmptyValues() {
-        for (char[] column : game.getColumns()) {
-            for (char position : column) {
-                assertThat("each position must be empty", position, equalTo(Character.MIN_VALUE));
-            }
-        }
+        Assert.assertTrue("each position must be empty", game.getBoard().isEmpty());
     }
 
     /**
@@ -84,16 +81,14 @@ public class GridSpec {
         game.insertDisc(1);
     }
 
-
     @Test
-    public void verifyValueAtPosition(){
+    public void verifyValueAtPosition() {
         game.insertDisc(1);
         game.insertDisc(1);
         game.insertDisc(1);
-        assertThat(game.getValueAtPosition(1,5), equalTo('G'));
-        assertThat(game.getValueAtPosition(1,4), equalTo('R'));
-        assertThat(game.getValueAtPosition(1,3), equalTo('G'));
+        assertThat(game.getValueAtPosition(1, 5), equalTo('G'));
+        assertThat(game.getValueAtPosition(1, 4), equalTo('R'));
+        assertThat(game.getValueAtPosition(1, 3), equalTo('G'));
     }
-
 
 }
